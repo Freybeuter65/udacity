@@ -90,38 +90,32 @@ std::unordered_set<int> RansacPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, i
 	{
 	 	p1 = rand() % 976;
 	  	p2 = rand() % 976;
-	  	p3 = rand() % 976;
-
+	  	p3 = rand() % 976
 		// get the plane points pnt1, pnt2, pnt3
 		pcl::PointXYZ pnt1 = cloud->points[p1];
 		pcl::PointXYZ pnt2 = cloud->points[p2];
-		pcl::PointXYZ pnt3 = cloud->points[p3];
-
+		pcl::PointXYZ pnt3 = cloud->points[p3]
 		// get vectors vct1, vct2
 		pcl::PointXYZ vct1;
 		pcl::PointXYZ vct2;
 		vct1.x = pnt2.x - pnt1.x;
 		vct1.y = pnt2.y - pnt1.y;
-		vct1.z = pnt2.z - pnt1.z;
-		
+		vct1.z = pnt2.z - pnt1.z
 		vct2.x = pnt3.x - pnt1.x;
 		vct2.y = pnt3.y - pnt1.y;
-		vct2.z = pnt3.z - pnt1.z;
-
+		vct2.z = pnt3.z - pnt1.z
 		// calculate cross product v1 * v2 = normal vector nrm_vct
 		pcl::PointXYZ nrm_vct;
 		nrm_vct.x = (vct1.y * vct2.z) - (vct1.z * vct2.y);
 		nrm_vct.y = (vct1.z * vct2.x) - (vct1.x * vct2.z);
-		nrm_vct.z = (vct1.x * vct2.y) - (vct1.y * vct2.x);
-		
+		nrm_vct.z = (vct1.x * vct2.y) - (vct1.y * vct2.x)
 		// calculate the plane equation coeffiecients
 		qtn.pln_cff_a = nrm_vct.x;
 		qtn.pln_cff_b = nrm_vct.y;
 		qtn.pln_cff_c = nrm_vct.z;
 		qtn.pln_cff_d = - ( (nrm_vct.x * (vct1.z - vct2.y)) +
 		 					(nrm_vct.y * (vct1.x - vct2.z)) +
-		 					(nrm_vct.z * (vct1.y - vct2.x)) );
-		
+		 					(nrm_vct.z * (vct1.y - vct2.x)) )
 		// calc the distance from plane equation to every other point
 		// and store it in unordered_set if the distanceTol will fit
 		for( int idx_dist = 0; idx_dist < cloud->points.size(); idx_dist++ )
@@ -136,15 +130,13 @@ std::unordered_set<int> RansacPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, i
 			dist_sqrt = sqrt( qtn.pln_cff_a * qtn.pln_cff_a + 
 							  qtn.pln_cff_b * qtn.pln_cff_b +
 							  qtn.pln_cff_c * qtn.pln_cff_c );
-			dist = dist_cnt / dist_sqrt;
-		
+			dist = dist_cnt / dist_sqrt
 			// evaluate distance tolerance
 			if( dist < distanceTol )
 			{
 				inliersResult[inlier_idx].insert( idx_dist );
 			}
 		}
-
 		if( inlier_idx == 1 )
 		{
 			if( inliersResult[1].size() > inliersResult[0].size() )

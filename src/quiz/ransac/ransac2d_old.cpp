@@ -92,89 +92,99 @@ std::unordered_set<int> RansacPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, i
 	  	p2 = rand() % 976;
 	  	p3 = rand() % 976;
 
-		// get the plane points pnt1, pnt2, pnt3
-		pcl::PointXYZ pnt1 = cloud->points[p1];
-		pcl::PointXYZ pnt2 = cloud->points[p2];
-		pcl::PointXYZ pnt3 = cloud->points[p3];
 
-		// get vectors vct1, vct2
-		pcl::PointXYZ vct1;
-		pcl::PointXYZ vct2;
-		vct1.x = pnt2.x - pnt1.x;
-		vct1.y = pnt2.y - pnt1.y;
-		vct1.z = pnt2.z - pnt1.z;
-		
-		vct2.x = pnt3.x - pnt1.x;
-		vct2.y = pnt3.y - pnt1.y;
-		vct2.z = pnt3.z - pnt1.z;
+	// for( p1 = 0; p1 < cloud->points.size(); p1++ )
+	// {
+	// 	int p2 = p1 + 1;
+	//  	for( ; p2 < cloud->points.size(); p2++ )
+	//  	{
+	//  		int p3 = p2 + 1;
+	//  		for( ; p3 < cloud->points.size(); p3++ )
+	//  		{
+				// get the plane points pnt1, pnt2, pnt3
+				pcl::PointXYZ pnt1 = cloud->points[p1];
+				pcl::PointXYZ pnt2 = cloud->points[p2];
+				pcl::PointXYZ pnt3 = cloud->points[p3];
 
-		// calculate cross product v1 * v2 = normal vector nrm_vct
-		pcl::PointXYZ nrm_vct;
-		nrm_vct.x = (vct1.y * vct2.z) - (vct1.z * vct2.y);
-		nrm_vct.y = (vct1.z * vct2.x) - (vct1.x * vct2.z);
-		nrm_vct.z = (vct1.x * vct2.y) - (vct1.y * vct2.x);
-		
-		// calculate the plane equation coeffiecients
-		qtn.pln_cff_a = nrm_vct.x;
-		qtn.pln_cff_b = nrm_vct.y;
-		qtn.pln_cff_c = nrm_vct.z;
-		qtn.pln_cff_d = - ( (nrm_vct.x * (vct1.z - vct2.y)) +
-		 					(nrm_vct.y * (vct1.x - vct2.z)) +
-		 					(nrm_vct.z * (vct1.y - vct2.x)) );
-		
-		// calc the distance from plane equation to every other point
-		// and store it in unordered_set if the distanceTol will fit
-		for( int idx_dist = 0; idx_dist < cloud->points.size(); idx_dist++ )
-		{
-			pcl::PointXYZ pnt_dist = cloud->points[idx_dist];
-			dist_cnt = 	qtn.pln_cff_a * pnt_dist.x + 
-						qtn.pln_cff_b * pnt_dist.y + 
-						qtn.pln_cff_c * pnt_dist.z +
-						qtn.pln_cff_d;
-			if( dist_cnt < 0 )
-				dist_cnt *= -1;
-			dist_sqrt = sqrt( qtn.pln_cff_a * qtn.pln_cff_a + 
-							  qtn.pln_cff_b * qtn.pln_cff_b +
-							  qtn.pln_cff_c * qtn.pln_cff_c );
-			dist = dist_cnt / dist_sqrt;
-		
-			// evaluate distance tolerance
-			if( dist < distanceTol )
-			{
-				inliersResult[inlier_idx].insert( idx_dist );
-			}
-		}
+				// get vectors vct1, vct2
+				pcl::PointXYZ vct1;
+				pcl::PointXYZ vct2;
+				vct1.x = pnt2.x - pnt1.x;
+				vct1.y = pnt2.y - pnt1.y;
+				vct1.z = pnt2.z - pnt1.z;
 
-		if( inlier_idx == 1 )
-		{
-			if( inliersResult[1].size() > inliersResult[0].size() )
-			{
-				inliersResult[0].clear();
-				inlier_idx = 0;
-				inlier_out = 1;
-			}
-			else
-			{
-				inliersResult[1].clear();
-				inlier_idx = 1;
-				inlier_out = 0;
-			}
-		}
-		else
-		{
-			if( inliersResult[0].size() > inliersResult[1].size() )
-			{
-				inliersResult[1].clear();
-				inlier_idx = 1;
-				inlier_out = 0;
-			}
-			else
-			{
-				inliersResult[0].clear();
-				inlier_idx = 0;
-				inlier_out = 1;
-			}
-		}
+				vct2.x = pnt3.x - pnt1.x;
+				vct2.y = pnt3.y - pnt1.y;
+				vct2.z = pnt3.z - pnt1.z;
+
+				// calculate cross product v1 * v2 = normal vector nrm_vct
+				pcl::PointXYZ nrm_vct;
+				nrm_vct.x = (vct1.y * vct2.z) - (vct1.z * vct2.y);
+				nrm_vct.y = (vct1.z * vct2.x) - (vct1.x * vct2.z);
+				nrm_vct.z = (vct1.x * vct2.y) - (vct1.y * vct2.x);
+
+				// calculate the plane equation coeffiecients
+				qtn.pln_cff_a = nrm_vct.x;
+				qtn.pln_cff_b = nrm_vct.y;
+				qtn.pln_cff_c = nrm_vct.z;
+				qtn.pln_cff_d = - ( (nrm_vct.x * (vct1.z - vct2.y)) +
+				 					(nrm_vct.y * (vct1.x - vct2.z)) +
+				 					(nrm_vct.z * (vct1.y - vct2.x)) );
+
+				// calc the distance from plane equation to every other point
+				// and store it in unordered_set if the distanceTol will fit
+				for( int idx_dist = 0; idx_dist < cloud->points.size(); idx_dist++ )
+				{
+					pcl::PointXYZ pnt_dist = cloud->points[idx_dist];
+					dist_cnt = 	qtn.pln_cff_a * pnt_dist.x + 
+								qtn.pln_cff_b * pnt_dist.y + 
+								qtn.pln_cff_c * pnt_dist.z +
+								qtn.pln_cff_d;
+					if( dist_cnt < 0 )
+						dist_cnt *= -1;
+					dist_sqrt = sqrt( qtn.pln_cff_a * qtn.pln_cff_a + 
+									  qtn.pln_cff_b * qtn.pln_cff_b +
+									  qtn.pln_cff_c * qtn.pln_cff_c );
+					dist = dist_cnt / dist_sqrt;
+
+					// evaluate distance tolerance
+					if( dist < distanceTol )
+					{
+						inliersResult[inlier_idx].insert( idx_dist );
+					}
+				}
+				if( inlier_idx == 1 )
+				{
+					if( inliersResult[1].size() > inliersResult[0].size() )
+					{
+						inliersResult[0].clear();
+						inlier_idx = 0;
+						inlier_out = 1;
+					}
+					else
+					{
+						inliersResult[1].clear();
+						inlier_idx = 1;
+						inlier_out = 0;
+					}
+				}
+				else
+				{
+					if( inliersResult[0].size() > inliersResult[1].size() )
+					{
+						inliersResult[1].clear();
+						inlier_idx = 1;
+						inlier_out = 0;
+					}
+					else
+					{
+						inliersResult[0].clear();
+						inlier_idx = 0;
+						inlier_out = 1;
+					}
+				}
+	 	//	}
+	// 	}
 	}
 
 	return inliersResult[inlier_out];
@@ -195,8 +205,81 @@ std::unordered_set<int> Ransac(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int ma
 		float ln_cff_c;
 	} qtn;
 
-	int inlier_idx = 0;
-	int inlier_out = 0;
+	int inlier_result_idx = 0;
+	int inlier_result_out = 0;
+
+
+#ifdef NO
+	for( idx_one = 0; idx_one < cloud->points.size(); idx_one++ )
+	{
+		// Combination without repetition = 190
+		idx_two = idx_one + 1;
+		for( ; idx_two < cloud->points.size(); idx_two++ )
+		{
+			// get the line equation
+			pcl::PointXYZ pnt_one = cloud->points[idx_one];
+			pcl::PointXYZ pnt_two = cloud->points[idx_two];
+			qtn.ln_cff_a = pnt_one.y - pnt_two.y;
+			qtn.ln_cff_b = pnt_two.x - pnt_one.x;
+			qtn.ln_cff_c = pnt_one.x * pnt_two.y - pnt_two.x * pnt_one.y;
+		
+			// calc the distance from line equation to every other point
+			// and store it in unordered_set if the distanceTol will fit
+			for( int idx_dist = 0; idx_dist < cloud->points.size(); idx_dist++ )
+			{
+				//if( idx_dist != idx_one && idx_dist != idx_two )
+				{
+					pcl::PointXYZ pnt_dist = cloud->points[idx_dist];
+					dist_cnt = qtn.ln_cff_a * pnt_dist.x + qtn.ln_cff_b * pnt_dist.y + qtn.ln_cff_c;
+					if( dist_cnt < 0 )
+						dist_cnt *= -1;
+					dist_sqrt = sqrt( qtn.ln_cff_a * qtn.ln_cff_a + qtn.ln_cff_b * qtn.ln_cff_b );
+					dist = dist_cnt / dist_sqrt;
+
+					//std::cout << qtn.ln_cff_a << "\t" << qtn.ln_cff_b << "\t" << qtn.ln_cff_c << "\t" << 
+					//			 "\t" << dist_cnt << "\t" << "\t" << dist_sqrt << "\t" << "\t" << dist << std::endl;
+			
+					// prove of distance tolerance
+					if( dist < distanceTol )
+					{
+						inliersResult[inlier_result_idx].insert( idx_dist );
+					}
+				}
+			}
+			if( inlier_result_idx == 1 )
+			{
+				if( inliersResult[1].size() > inliersResult[0].size() )
+				{
+					inliersResult[0].clear();
+					inlier_result_idx = 0;
+					inlier_result_out = 1;
+				}
+				else
+				{
+					inliersResult[1].clear();
+					inlier_result_idx = 1;
+					inlier_result_out = 0;
+				}
+			}
+			else
+			{
+				if( inliersResult[0].size() > inliersResult[1].size() )
+				{
+					inliersResult[1].clear();
+					inlier_result_idx = 1;
+					inlier_result_out = 0;
+				}
+				else
+				{
+					inliersResult[0].clear();
+					inlier_result_idx = 0;
+					inlier_result_out = 1;
+				}
+			}
+		}
+	}
+#endif
+
 	int iter = maxIterations;
 	int pnt_rand_one, pnt_rand_two;
 	while( --iter >= 0  )
@@ -227,23 +310,23 @@ std::unordered_set<int> Ransac(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int ma
 			// prove of distance tolerance
 			if( dist < distanceTol )
 			{
-				inliersResult[inlier_idx].insert( idx_dist );
+				inliersResult[inlier_result_idx].insert( idx_dist );
 			}
 		}
 
-		if( inlier_idx == 1 )
+		if( inlier_result_idx == 1 )
 		{
 			if( inliersResult[1].size() > inliersResult[0].size() )
 			{
 				inliersResult[0].clear();
-				inlier_idx = 0;
-				inlier_out = 1;
+				inlier_result_idx = 0;
+				inlier_result_out = 1;
 			}
 			else
 			{
 				inliersResult[1].clear();
-				inlier_idx = 1;
-				inlier_out = 0;
+				inlier_result_idx = 1;
+				inlier_result_out = 0;
 			}
 		}
 		else
@@ -251,19 +334,27 @@ std::unordered_set<int> Ransac(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int ma
 			if( inliersResult[0].size() > inliersResult[1].size() )
 			{
 				inliersResult[1].clear();
-				inlier_idx = 1;
-				inlier_out = 0;
+				inlier_result_idx = 1;
+				inlier_result_out = 0;
 			}
 			else
 			{
 				inliersResult[0].clear();
-				inlier_idx = 0;
-				inlier_out = 1;
+				inlier_result_idx = 0;
+				inlier_result_out = 1;
 			}
 		}
 	}
 
-	return inliersResult[inlier_out];
+
+	// Randomly sample subset and fit line
+
+	// Measure distance between every point and fitted line
+	// If distance is smaller than threshold count it as inlier
+
+	// Return indicies of inliers from fitted line with most inliers
+	
+	return inliersResult[inlier_result_out];
 }
 
 
@@ -280,7 +371,7 @@ int main ()
 
 	// TODO: Change the max iteration and distance tolerance arguments for Ransac function
 	//std::unordered_set<int> inliers = Ransac(cloud, 50, 0.5);
-	std::unordered_set<int> inliers = RansacPlane(cloud, 300, 0.5);
+	std::unordered_set<int> inliers = RansacPlane(cloud, 100, 0.5);
 
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudInliers(new pcl::PointCloud<pcl::PointXYZ>());
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudOutliers(new pcl::PointCloud<pcl::PointXYZ>());
