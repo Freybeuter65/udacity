@@ -33,7 +33,6 @@ void renderRays(pcl::visualization::PCLVisualizer::Ptr& viewer, const Vect3& ori
 
 void clearRays(pcl::visualization::PCLVisualizer::Ptr& viewer)
 {
-
 	while(countRays)
 	{
 		countRays--;

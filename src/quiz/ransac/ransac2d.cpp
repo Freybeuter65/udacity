@@ -197,6 +197,79 @@ std::unordered_set<int> Ransac(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int ma
 
 	int inlier_idx = 0;
 	int inlier_out = 0;
+
+
+#ifdef NO
+	for( idx_one = 0; idx_one < cloud->points.size(); idx_one++ )
+	{
+		// Combination without repetition = 190
+		idx_two = idx_one + 1;
+		for( ; idx_two < cloud->points.size(); idx_two++ )
+		{
+			// get the line equation
+			pcl::PointXYZ pnt_one = cloud->points[idx_one];
+			pcl::PointXYZ pnt_two = cloud->points[idx_two];
+			qtn.ln_cff_a = pnt_one.y - pnt_two.y;
+			qtn.ln_cff_b = pnt_two.x - pnt_one.x;
+			qtn.ln_cff_c = pnt_one.x * pnt_two.y - pnt_two.x * pnt_one.y;
+		
+			// calc the distance from line equation to every other point
+			// and store it in unordered_set if the distanceTol will fit
+			for( int idx_dist = 0; idx_dist < cloud->points.size(); idx_dist++ )
+			{
+				//if( idx_dist != idx_one && idx_dist != idx_two )
+				{
+					pcl::PointXYZ pnt_dist = cloud->points[idx_dist];
+					dist_cnt = qtn.ln_cff_a * pnt_dist.x + qtn.ln_cff_b * pnt_dist.y + qtn.ln_cff_c;
+					if( dist_cnt < 0 )
+						dist_cnt *= -1;
+					dist_sqrt = sqrt( qtn.ln_cff_a * qtn.ln_cff_a + qtn.ln_cff_b * qtn.ln_cff_b );
+					dist = dist_cnt / dist_sqrt;
+
+					//std::cout << qtn.ln_cff_a << "\t" << qtn.ln_cff_b << "\t" << qtn.ln_cff_c << "\t" << 
+					//			 "\t" << dist_cnt << "\t" << "\t" << dist_sqrt << "\t" << "\t" << dist << std::endl;
+			
+					// prove of distance tolerance
+					if( dist < distanceTol )
+					{
+						inliersResult[inlier_result_idx].insert( idx_dist );
+					}
+				}
+			}
+			if( inlier_result_idx == 1 )
+			{
+				if( inliersResult[1].size() > inliersResult[0].size() )
+				{
+					inliersResult[0].clear();
+					inlier_result_idx = 0;
+					inlier_result_out = 1;
+				}
+				else
+				{
+					inliersResult[1].clear();
+					inlier_result_idx = 1;
+					inlier_result_out = 0;
+				}
+			}
+			else
+			{
+				if( inliersResult[0].size() > inliersResult[1].size() )
+				{
+					inliersResult[1].clear();
+					inlier_result_idx = 1;
+					inlier_result_out = 0;
+				}
+				else
+				{
+					inliersResult[0].clear();
+					inlier_result_idx = 0;
+					inlier_result_out = 1;
+				}
+			}
+		}
+	}
+#endif
+
 	int iter = maxIterations;
 	int pnt_rand_one, pnt_rand_two;
 	while( --iter >= 0  )
@@ -263,6 +336,14 @@ std::unordered_set<int> Ransac(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int ma
 		}
 	}
 
+
+	// Randomly sample subset and fit line
+
+	// Measure distance between every point and fitted line
+	// If distance is smaller than threshold count it as inlier
+
+	// Return indicies of inliers from fitted line with most inliers
+	
 	return inliersResult[inlier_out];
 }
 
@@ -280,9 +361,9 @@ int main ()
 
 	// TODO: Change the max iteration and distance tolerance arguments for Ransac function
 	//std::unordered_set<int> inliers = Ransac(cloud, 50, 0.5);
-	std::unordered_set<int> inliers = RansacPlane(cloud, 300, 0.5);
+	std::unordered_set<int> inliers = RansacPlane(cloud, 100, 0.5);
 
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudInliers(new pcl::PointCloud<pcl::PointXYZ>());
+	pcl::PointCloud<pcl::PointXYZ>::Ptr  cloudInliers(new pcl::PointCloud<pcl::PointXYZ>());
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudOutliers(new pcl::PointCloud<pcl::PointXYZ>());
 
 	for(int index = 0; index < cloud->points.size(); index++)
